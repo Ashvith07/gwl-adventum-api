@@ -1,0 +1,171 @@
+Application Deployment in AWS
+
+Application needed to be hosted in AWS
+Annotation Tool
+Admin App
+API app
+DB (postgreSQL)
+
+DB (postgreSQL) : Create a RDS instance for postgreSQL create a database. Once the instance of DB is created it is provided with host, port number and password to create DB, using that credentials we can connect to DB where tables are created with query shared below at the end of this docs
+
+
+Create Instance in aws to run app
+
+Before hosting this applications it's necessary to install nodejs  with commands below
+sudo apt install nodejs
+Sudo apt install npm
+Make sure all the necessary node dependencies are installed by checking their version using below commands :
+Node -v
+Npm --version
+
+ 
+API app : Host node app with all source files in github with link shared below, before hosting this application please add the credentials of AWS secret key, accessID and DB instance. Which is not uploaded to git for security purpose
+https://github.com/adventum-dev/gwl_adventum_api.git
+
+Command to run node app in development: 
+Npm i
+npm run dev
+
+Command to run node app in production : 
+Npm i
+npm run build
+
+Annotation Tool : with all the source files in github please replace all link with localhost to actual link one gets from hosting of api and point all images to S3 bucket.
+Source files of this application is uploaded to GitHub of ID adventum-dev account and same link is shared below
+https://github.com/adventum-dev/gwl_user.git
+
+Command to run meteor app in development : 
+Npm i
+Meteor
+
+Command to run meteor in production:
+Npm i 
+Meteor build
+
+
+Admin App : This is react app with all the files in github replace links with localhost to actual link got from hosting node app 
+https://github.com/adventum-dev/gwl_adventum_admin.git
+
+Command to run react app in development:
+ Npm i
+ npm start
+
+
+Command to run react app in production:
+ Npm i
+ npm run build
+
+
+
+Query to create Database :
+Total 5 table with query given below
+
+CREATE TABLE public.folders
+(
+    uuid text COLLATE pg_catalog."default" NOT NULL,
+    doctor_uuid text COLLATE pg_catalog."default" NOT NULL,
+    patient_uuid text COLLATE pg_catalog."default",
+    folder_id character varying COLLATE pg_catalog."default",
+    folder_status character varying COLLATE pg_catalog."default",
+    created_by text COLLATE pg_catalog."default",
+    created_time bigint,
+    updated_by text COLLATE pg_catalog."default",
+    updated_time bigint,
+    last_labelled character varying COLLATE pg_catalog."default",
+    active boolean,
+    CONSTRAINT folders_pkey PRIMARY KEY (uuid),
+    CONSTRAINT folders_doctor_uuid_fkey FOREIGN KEY (doctor_uuid)
+        REFERENCES public.users (uuid) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT folders_patient_uuid_fkey FOREIGN KEY (patient_uuid)
+        REFERENCES public.patient_info (uuid) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+
+
+CREATE TABLE public.images
+(
+    uuid text COLLATE pg_catalog."default" NOT NULL,
+    user_uuid text COLLATE pg_catalog."default" NOT NULL,
+    folder_id character varying COLLATE pg_catalog."default" NOT NULL,
+    image_id character varying COLLATE pg_catalog."default" NOT NULL,
+    status character varying COLLATE pg_catalog."default" NOT NULL DEFAULT 'not opened'::character varying,
+    created_by text COLLATE pg_catalog."default",
+    created_date bigint,
+    updated_by text COLLATE pg_catalog."default",
+    updated_date bigint,
+    isactive boolean DEFAULT true,
+    labelled_images_id character varying COLLATE pg_catalog."default",
+    CONSTRAINT images_pkey PRIMARY KEY (uuid),
+    CONSTRAINT image_uuid_fk FOREIGN KEY (user_uuid)
+        REFERENCES public.users (uuid) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+
+
+CREATE TABLE public.patient_info
+(
+    uuid text COLLATE pg_catalog."default" NOT NULL,
+    study_id character varying COLLATE pg_catalog."default",
+    age integer,
+    gender text COLLATE pg_catalog."default",
+    date_of_birth character varying COLLATE pg_catalog."default",
+    date_of_scan character varying COLLATE pg_catalog."default",
+    device text COLLATE pg_catalog."default",
+    eye text COLLATE pg_catalog."default",
+    last_labelled character varying COLLATE pg_catalog."default",
+    created_time bigint NOT NULL,
+    created_by text COLLATE pg_catalog."default",
+    updated_by text COLLATE pg_catalog."default",
+    updated_time bigint,
+    active boolean,
+    CONSTRAINT patient_info_pkey PRIMARY KEY (uuid)
+)
+
+
+CREATE TABLE public.session
+(
+    uuid character varying COLLATE pg_catalog."default" NOT NULL,
+    user_uuid text COLLATE pg_catalog."default" NOT NULL,
+    token character varying COLLATE pg_catalog."default" NOT NULL,
+    login_time bigint,
+    logout_time bigint,
+    active boolean NOT NULL,
+    labelled_image integer,
+    CONSTRAINT session_details_pkey PRIMARY KEY (token),
+    CONSTRAINT session_uuid_fk FOREIGN KEY (uuid)
+        REFERENCES public.users (uuid) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+
+
+CREATE TABLE public.users
+(
+    uuid text COLLATE pg_catalog."default" NOT NULL,
+    user_name text COLLATE pg_catalog."default" NOT NULL,
+    gender text COLLATE pg_catalog."default",
+    phone bigint,
+    email character varying COLLATE pg_catalog."default",
+    password character varying COLLATE pg_catalog."default" NOT NULL,
+    created_by text COLLATE pg_catalog."default",
+    created_time bigint NOT NULL,
+    updated_by text COLLATE pg_catalog."default",
+    updated_time bigint,
+    active boolean DEFAULT true,
+    user_type character varying COLLATE pg_catalog."default" NOT NULL,
+    name text COLLATE pg_catalog."default",
+    CONSTRAINT users_pkey PRIMARY KEY (uuid)
+)
+
+
+
+
+
